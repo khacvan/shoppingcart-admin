@@ -35,6 +35,17 @@ public class BrandController {
     private CategoryService serviceCat;
 
     private String defaultRedirectURL ="redirect:/brands/page/1?sortField=name&sortDir=asc";
+
+
+//    @PostMapping("/brands/check_unique")
+//    public String check_unique(Integer id, String name){
+//        return service.checkUnique(id, name);
+//    }
+
+
+//    @GetMapping("/brands/{id}/categories")
+
+
     @GetMapping("/brands/new")
     public String showForm(Model model){
         Brand brand = new Brand();

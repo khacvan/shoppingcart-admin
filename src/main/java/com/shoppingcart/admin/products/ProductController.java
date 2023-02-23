@@ -36,18 +36,60 @@ public class ProductController {
     private CategoryService serviceCat;
 
     private String defaultRedirectURL ="redirect:/products/page/1?sortField=name&sortDir=asc";
+
+
     @GetMapping("/products/new")
-    public String showForm(Model model){
+    public String createNew(Model model) {
+        List<Brand> listBrands = brandService.listAll();
+        List<Category> listCategories = brandService.listCategories();
         Product product = new Product();
-        model.addAttribute("Product",product);
-        List<Category> listCategories = serviceCat.listCategoriesUsedInForm();
+        product.setEnabled(true);
+        product.setInStock(true);
+
+        model.addAttribute("listBrands", listBrands);
         model.addAttribute("listCategories", listCategories);
+        model.addAttribute("product", product);
+        model.addAttribute("pageTitle", "Create Product");
+        model.addAttribute("numberofExisringExtraimages",0);
 
-
-        model.addAttribute("pageTitle","Create New Product");
-        return "products/products_form";
-
+        return "products/product_form";
     }
+
+    @PostMapping("/products/save")
+    public String saveProduct (Product product, Model model, RedirectAttributes redirectAttributes,
+                               @RequestParam("image") MultipartFile multipartFile) throws IOException {
+        if (!multipartFile.isEmpty()) {
+            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename()); // Amina Elshal.png--> Amina Elshal.png
+            product.setMainImage(fileName);
+            Product savedProduct = service.save(product);
+
+            String uploadDir = "product-mainImages/" + savedProduct.getId(); // tạo folder user-photos theo id để lưu hình
+
+            FileUploadUtil.cleanDir(uploadDir);
+            FileUploadUtil.saveFile(uploadDir,fileName, multipartFile);
+        }
+        else {
+            if (product.getMainImage()==null || product.getMainImage().isEmpty()) product.setMainImage(null); { // nếu ko chọn image thì lưu null
+                service.save(product);
+            }
+        }
+
+        redirectAttributes.addFlashAttribute("message", "The product has been saved successfully.");
+
+        return "redirect:/products";
+    }
+//    @GetMapping("/products/new")
+//    public String showForm(Model model){
+//        Product product = new Product();
+//        model.addAttribute("Product",product);
+//        List<Category> listCategories = serviceCat.listCategoriesUsedInForm();
+//        model.addAttribute("listCategories", listCategories);
+//
+//
+//        model.addAttribute("pageTitle","Create New Product");
+//        return "products/products_form";
+//
+//    }
 
 
 
@@ -61,29 +103,29 @@ public class ProductController {
     }
 
 
-    @PostMapping("/products/save")
-    public String saveCategory(Product product, RedirectAttributes redirectAttributes, @RequestParam("image") MultipartFile multipartFile) throws IOException {
-
-        if(!multipartFile.isEmpty()){
-            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-            product.setMainImage(fileName);
-            Product saveProduct = service.save(product);
-            String uploadDir = "product-images/" + saveProduct.getId();
-
-
-            FileUploadUtil.cleanDir(uploadDir);
-            FileUploadUtil.saveFile(uploadDir, fileName,multipartFile);
-
-        }else {
-            if(product.getMainImage().isEmpty()){
-                product.setMainImage(null);
-            }
-            service.save(product);
-
-        }
-
-        return "redirect:/products";
-    }
+//    @PostMapping("/products/save")
+//    public String saveCategory(Product product, RedirectAttributes redirectAttributes, @RequestParam("image") MultipartFile multipartFile) throws IOException {
+//
+//        if(!multipartFile.isEmpty()){
+//            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+//            product.setMainImage(fileName);
+//            Product saveProduct = service.save(product);
+//            String uploadDir = "product-images/" + saveProduct.getId();
+//
+//
+//            FileUploadUtil.cleanDir(uploadDir);
+//            FileUploadUtil.saveFile(uploadDir, fileName,multipartFile);
+//
+//        }else {
+//            if(product.getMainImage().isEmpty()){
+//                product.setMainImage(null);
+//            }
+//            service.save(product);
+//
+//        }
+//
+//        return "redirect:/products";
+//    }
 
 
     @GetMapping("/products/page/{pageNum}")

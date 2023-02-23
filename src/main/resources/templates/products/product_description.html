@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0">
+
+    <title>Create New</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
+    <!-- https://fontawesome.com/download =>nhấn download Free For Web, copy webfonts, copy css/all.css vào folder fontawesome-->
+    <!-- https://fontawesome.com/search =>search từ khóa pointrait =>chọn <i class="fa-solid fa-image-portrait"></i> -->
+    <link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/style.css}"/>
+    <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/richtext/richtext.min.css}">
+    <script th:src="@{/richtext/jquery.richtext.min.cs}"></script>
+</head>
+
+
+<body>
+
+<div th:fragment="content" th:remove="tag">
+    <label class="col-sm-10 col-form-label">Short Description:</label>
+    <div class="m-2">
+        <textarea type="text" class="form-control" th:field="*{shortDescription}" row="5" required/>
+    </div>
+</div>
+
+<div th:fragment="content" th:remove="tag">
+    <label class="col-sm-10 col-form-label">Full Description:</label>
+    <div class="m-2">
+        <textarea type="text" class="form-control" th:field="*{fullDescription}" row="5" required/>
+    </div>
+</div>
+
+    <div class="text-center m-3">
+        <p>Shopping Cart Control Panel - Create by &copy; Shopping Cart</p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    MAX_FILE_SIZE = 502400;
+
+    moduleURL = "[[@{/products}]]";
+    brandModuleURL="[[@{/brands}]]";
+    defaultUmageThumbnailSrc = "[[@{image/image-thumbnai.png}]]";
+    checkUniqueUrl ="[[@{/products/check_unique}]]";
+
+    function checkUnique(form){
+
+        catId = $("#id").val();
+        catName = $("#name").val();
+
+        csrValue = $("input[name='_csrf']").val();
+        url = "[[@{/categories/check_unique}]]";
+        params = {id: catId,name: catName ,_crsf: csrValue};
+
+
+        $.post(url, params, function (response) {
+            if (response == "OK") {
+                form.submit();
+            }else if(response == "Duplicated"){
+                showWarningModal("There is another category having the name " + catName);
+
+            }else {
+                showErrorModal("Unknown response on server");
+            }
+        }).fail(function() {
+            alert("could not connect to server");
+        });
+
+        return false;
+    }
+
+</script>
+<script th:src="@{/js/common_form.js}"></script>
+<script th:src="@{/js/product_overview_form.js}"></script>
+<script th:src="@{/js/product_image_form.js}"></script>
+<script th:src="@{/js/product_detail_form.js}"></script>
+
+<script>
+    $(document).ready(function() {
+        // var selectElement = $('select[name="categories"]');
+        // var chosenCategories = $('#chosen-categories');
+        // selectElement.on('change', function() {
+        //     chosenCategories.empty();
+        //     var selectedOptions = selectElement.find('option:selected');
+        //     if (selectedOptions.length) {
+        //         selectedOptions.each(function() {
+        //             var value = $(this).text();
+        //             chosenCategories.append('<span class="badge badge-secondary mr-1">' + value + '</span>');
+        //         });
+        //     } else {
+        //         chosenCategories.text('');
+        //     }
+        // });
+        dropdownCategories = $('select[name="categories"]');
+        divChosenCategories= $('#chosen-categories');
+
+        dropdownCategories.change(function (){
+            divChosenCategories.empty();
+            showCategoriesChosen();
+        });
+
+        showCategoriesChosen();
+
+
+    });
+
+
+    function showCategoriesChosen(){
+        dropdownCategories.children("option:selected").each(function () {
+            seletedCategory = $(this);
+            catId = seletedCategory.val();
+            catName = seletedCategory.text().replace(/-/g, "");
+
+            divChosenCategories.append('<span class="badge badge-secondary mr-1">' + catName + '</span>')
+
+        })
+    }
+</script>
+</body>
+</html>
